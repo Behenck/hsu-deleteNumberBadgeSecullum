@@ -1,91 +1,65 @@
+"use client"
+import { AdjusterForm, Button, Form, FormControl, Input, Main, Select, Window } from "./styles"
 import Image from 'next/image'
-import { Inter } from '@next/font/google'
-import styles from './page.module.css'
+import WomanBloodBankImage from '../assets/fundo.jpg'
+import { api } from "@/services/api"
+import { useForm } from "react-hook-form";
+import { z } from "zod"
+import { zodResolver } from '@hookform/resolvers/zod'
+import { toast, Toaster } from "react-hot-toast"
 
-const inter = Inter({ subsets: ['latin'] })
+const DeleteNumberBadgeToSecullumFormSchema = z.object({
+  number: z.string(),
+})
+
+type DeleteNumberBadgeToSecullumFormInputs = z.infer<typeof DeleteNumberBadgeToSecullumFormSchema>
 
 export default function Home() {
+  const {
+    register,
+    handleSubmit,
+    reset,
+  } = useForm<DeleteNumberBadgeToSecullumFormInputs>({
+    resolver: zodResolver(DeleteNumberBadgeToSecullumFormSchema),
+  })
+
+  async function handleUpdateBloodDonor(data: DeleteNumberBadgeToSecullumFormInputs) {
+    const { number } = data
+
+    try {
+      await api.post('/deleteNumberBadge', {
+        number
+      })
+     
+      reset()
+      toast.success("Dados atualizados com sucesso!")
+
+    } catch (err) {
+      console.log(err)
+      toast.error("Esse crachá não esta cadastrado!")
+    }
+  }
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
+    <Main>
+      <Toaster />
+      <Window>
         <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+          <Image src={WomanBloodBankImage} alt="image" width={500} height={500} />
         </div>
-      </div>
+        <AdjusterForm>
+          <h1>Remover crachá</h1>
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-        <div className={styles.thirteen}>
-          <Image src="/thirteen.svg" alt="13" width={40} height={31} priority />
-        </div>
-      </div>
+          <Form onSubmit={handleSubmit(handleUpdateBloodDonor)}>
+            <FormControl>
+              <label htmlFor="donor">Número do crachá</label>
+              <Input id="donor" type="text" {...register("number")} />
+            </FormControl>
 
-      <div className={styles.grid}>
-        <a
-          href="https://beta.nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+            <Button type="submit">Deletar crachá</Button>
+          </Form>
+        </AdjusterForm>
+      </Window>
+    </Main>
   )
 }
