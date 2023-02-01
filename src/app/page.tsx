@@ -7,6 +7,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod"
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast, Toaster } from "react-hot-toast"
+import { useState } from "react"
+import { Loading } from "@/components/Loading"
 
 const DeleteNumberBadgeToSecullumFormSchema = z.object({
   number: z.string(),
@@ -15,6 +17,7 @@ const DeleteNumberBadgeToSecullumFormSchema = z.object({
 type DeleteNumberBadgeToSecullumFormInputs = z.infer<typeof DeleteNumberBadgeToSecullumFormSchema>
 
 export default function Home() {
+  const [isLoading, setIsLoading] = useState(false)
   const {
     register,
     handleSubmit,
@@ -24,19 +27,20 @@ export default function Home() {
   })
 
   async function handleUpdateBloodDonor(data: DeleteNumberBadgeToSecullumFormInputs) {
+    setIsLoading(true)
     const { number } = data
 
     try {
       await api.post('/deleteNumberBadge', {
         number
       })
-     
+      setIsLoading(false)
       reset()
       toast.success("Dados atualizados com sucesso!")
 
     } catch (err) {
-      console.log(err)
       toast.error("Esse crachá não esta cadastrado!")
+      setIsLoading(false)
     }
   }
 
@@ -56,7 +60,9 @@ export default function Home() {
               <Input id="donor" type="text" {...register("number")} />
             </FormControl>
 
-            <Button type="submit">Deletar crachá</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? <Loading/> : "Deletar crachá"}
+            </Button>
           </Form>
         </AdjusterForm>
       </Window>
